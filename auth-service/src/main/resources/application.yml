@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: auth-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/auth_db?sslMode=DISABLED&allowPublicKeyRetrieval=true&connectionTimeZone=UTC
+    username: auth_user
+    password: ${AUTH_DB_PASSWORD}
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: false
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+server:
+  port: 8084
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE
+    org.springframework.web: DEBUG
+
+app:
+  jwt:
+    private-key: ${JWT_PRIVATE_KEY}
+    public-key: ${JWT_PUBLIC_KEY}
+    key-id: ${JWT_KEY_ID:}
+    issuer: ejada-auth
+    audience: ejada-ecommerce
+    access-token-ttl: 15m
+    refresh-token-ttl: 7d

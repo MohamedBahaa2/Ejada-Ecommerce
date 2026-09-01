@@ -1,0 +1,10 @@
+package com.ejada.ecommerce.wallet.security;
+
+import java.util.List;
+
+public record AuthenticatedUser(String userId, List<String> roles) {
+
+    public boolean hasRole(String role) {
+        return roles.contains(role);
+    }
+}

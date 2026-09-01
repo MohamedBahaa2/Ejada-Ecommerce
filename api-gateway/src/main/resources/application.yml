@@ -1,0 +1,74 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      server:
+        webflux:
+          globalcors:
+            cors-configurations:
+              '[/**]':
+                allowedOrigins:
+                  - "http://localhost:5173"
+                  - "http://localhost:3000"
+                allowedMethods: [ GET, POST, PUT, PATCH, DELETE, OPTIONS ]
+                allowedHeaders: [ "*" ]
+                allowCredentials: false
+                maxAge: 3600
+          default-filters:
+            - RemoveRequestHeader=X-User-Id
+            - RemoveRequestHeader=X-User-Roles
+          routes:
+            - id: auth-service
+              uri: http://localhost:8084
+              predicates:
+                - Path=/api/v1/auth/**
+
+            - id: wallet-service
+              uri: lb://WALLET-SERVICE
+              predicates:
+                - Path=/api/v1/wallets/**
+
+            - id: inventory-service
+              uri: lb://INVENTORY-SERVICE
+              predicates:
+                - Path=/api/v1/products/**,/api/v1/categories/**
+            - id: shop-service
+              uri: lb://SHOP-SERVICE
+              predicates:
+                - Path=/api/v1/cart/**,/api/v1/orders/**
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:8084/.well-known/jwks.json
+          issuer-uri: ejada-auth
+          audiences: ejada-ecommerce
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+
+app:
+  jwt:
+    issuer: ejada-auth
+    audience: ejada-ecommerce
